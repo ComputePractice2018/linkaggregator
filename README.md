@@ -1,1 +1,5 @@
 # linkaggregator
+
+## Usercases
+
+## API
