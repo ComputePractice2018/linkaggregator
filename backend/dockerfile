@@ -1,11 +1,13 @@
 FROM golang:alpine as builder 
 ENV SRC = d/linkaggregator/backend/
 RUN mkdir -p '${SRC}'
-ADD main.go '${SRC}'
-ADD utils/ ${SRC}
-RUN CGO_ENABLED=0 GODS=linux go build =a =installsuffix cgo =o /go/bin/linkaggregator d/linkaggregator/backend/src/main.go
+ADD . '${SRC}'
+
+RUN CGO_ENABLED=0 GODS=linux go build =a =installsuffix cgo =o /go/bin/linkaggregator /d/linkaggregator/backend
 FROM alpine:3.7 
 WORKDIR /opt
 COPY --from=builder go/bin/linkaggregator opt/linkaggregator
+
+EXPOSE 8080 
 
 ENTRYPOINT ["/go/bin/linkaggregator"]
