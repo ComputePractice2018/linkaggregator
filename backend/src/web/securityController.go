@@ -2,7 +2,7 @@ package web
 
 import (
 	"../../src/model"
-	"../../src/dao"
+	"../../src/dao/userRepository"
 	"../../src/config"
 	"../../src/utils"
 	"../../src/dto"
@@ -25,7 +25,7 @@ func Reg(requestContext echo.Context) error {
 		return requestContext.JSON(http.StatusOK, dto.Error("Invalid credentials"))
 	}
 
-	if dao.GetUserDao().IsUserExist(email, login) {
+	if userRepository.IsUserExist(email, login) {
 		return requestContext.JSON(http.StatusOK, dto.Error("User already exist"))
 	}
 
@@ -43,7 +43,7 @@ func Reg(requestContext echo.Context) error {
 
 	user.Password = string(hashedPassword)
 
-	if err := dao.GetUserDao().Insert(user); err != nil {
+	if err := userRepository.Insert(user); err != nil {
 		panic(err)
 	}
 
@@ -61,7 +61,7 @@ func Login(requestContext echo.Context) error {
 		return requestContext.JSON(http.StatusOK, dto.Error("Invalid credentials"))
 	}
 
-	user, err := dao.GetUserDao().FindByLogin(login)
+	user, err := userRepository.FindByLogin(login)
 
 	if err != nil {
 		return requestContext.JSON(http.StatusOK, dto.Error("User not found"))
@@ -82,7 +82,7 @@ func Principal(c echo.Context) error {
 	login := c.Get("login")
 	textLogin := fmt.Sprintf("%v", login)
 
-	user, err := dao.GetUserDao().FindByLogin(textLogin)
+	user, err := userRepository.FindByLogin(textLogin)
 
 	if err != nil {
 		return c.JSON(http.StatusOK, dto.Error("Unexpected error"))
