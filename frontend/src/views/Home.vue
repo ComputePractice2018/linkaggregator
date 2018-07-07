@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <LinkAggregator title="Новостной агрегатор"/>
-    <Security v-if="index_log < 0" title="Регистрация"/>
+    <Security v-if="index_log == 0" title="Регистрация"/>
     <p v-if="index_log > 0">Рабочее поле</p>
   </div>
 </template>
