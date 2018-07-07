@@ -9,6 +9,6 @@ FROM alpine:3.7
 WORKDIR /opt
 COPY --from=builder /d/linkaggregator opt/linkaggregator
 
-EXPOSE 8088 
+EXPOSE 8080 
 
 ENTRYPOINT ["/d/linkaggregator"]
