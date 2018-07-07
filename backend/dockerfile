@@ -3,18 +3,12 @@ ENV SRC = d/linkaggregator/backend/
 RUN mkdir -p '${SRC}'
 ADD . '${SRC}'
 
-FROM mongo
-
-WORKDIR /opt
-COPY --from=builder go/bin/linkaggregator opt/linkaggregator
-
-EXPOSE 8080 
-RUN CGO_ENABLED=0 GODS=linux go build -a -installsuffix cgo -o /go/bin/linkaggregator /d/linkaggregator/backend
+RUN CGO_ENABLED=0 GODS=linux go build -a -installsuffix cgo -o /d/linkaggregator /d/linkaggregator/backend/
 
 FROM alpine:3.7 
 WORKDIR /opt
-COPY --from=builder go/bin/linkaggregator opt/linkaggregator
+COPY --from=builder /d/linkaggregator opt/linkaggregator
 
 EXPOSE 8088 
 
-ENTRYPOINT ["/go/bin/linkaggregator"]
+ENTRYPOINT ["/d/linkaggregator"]
