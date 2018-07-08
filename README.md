@@ -147,3 +147,9 @@
     "success":"true"
 }
 ```
+## сборка и запуск п
+Backend
+'''bat
+
+docker build -f  dockerfile -t linkaggregator:<ветка> .
+ docker run -rm --name linkaggregator linkaggregator:<ветка>/bin/ash
