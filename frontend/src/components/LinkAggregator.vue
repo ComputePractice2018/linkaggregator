@@ -33,6 +33,7 @@
       <input type="button" value="Theme3" v-on:click="choose_theme('Theme3')"/>
       <input type="button" value="Theme4" v-on:click="choose_theme('Theme4')"/>
       <input type="button" value="All news" v-on:click="show_all_news"/>
+      <input type="button" value="Новости из подписок" v-on:click="show_sub_news"/>
     </div>
 
     <div id="news" class="flex-container">
@@ -89,6 +90,20 @@ export default {
       var length = this.news_list.length
       for (var i = 0; i < length; i++) {
         this.news_theme_list.push(this.news_list[i])
+      }
+    },
+    show_sub_news: function () {
+      this.news_theme_list.length = 0
+      var themeLength = this.themes.length
+      var newsLength = this.news_list.length
+      for (var i = 0; i < themeLength; i++) {
+        if (this.subscriptions.indexOf(this.themes[i]) > -1) {
+          for (var j = 0; j < newsLength; j++) {
+            if (this.themes[i] == this.news_list[j].theme) {
+              this.news_theme_list.push(this.news_list[j])
+            }
+          }
+        }
       }
     },
     show_subscriptions: function () {
