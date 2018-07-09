@@ -63,7 +63,6 @@ func main() {
 	securedRoutesInSecurityGroup.Use(SecurityContextPasser)
 	securedRoutesInSecurityGroup.GET("", web.Principal)
 
-
 	subscriptionRouterGroup := router.Group("/subscription")
 	subscriptionRouterGroup.Use(SecurityContextPasser)
 
