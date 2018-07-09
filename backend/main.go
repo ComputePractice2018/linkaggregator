@@ -10,5 +10,5 @@ func main() {
 	secondNumber := flag.Int("second", 2, "second multiply attribute")
 
 	fmt.Print("Hello world \n")
-	fmt.Printf("Sum of two int: %d\n", MultiplyTwoInt(*firstNumber, *secondNumber))
+	fmt.Printf("Sum of two int: %d\n", utils.MultiplyTwoInt(*firstNumber, *secondNumber))
 }
