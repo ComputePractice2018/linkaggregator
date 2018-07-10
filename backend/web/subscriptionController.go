@@ -5,16 +5,15 @@ import (
 	"encoding/json"
 	"github.com/ComputePractice2018/linkaggregator/backend/domain"
 	"log"
+	"fmt"
 )
 
 func GetSubscriptions(responseWriter http.ResponseWriter, request *http.Request) {
+
 	binaryData, err := json.Marshal(domain.Subscriptions)
 
 	if err != nil {
-		responseWriter.Header().Add("Content-Type", "application/json;charset=UTF-8")
-		responseWriter.WriteHeader(http.StatusInternalServerError)
-		unsuccessfulResponseBody, _ := json.Marshal(domain.Error("Unexpected error"))
-		responseWriter.Write(unsuccessfulResponseBody)
+		ProcessBadRequest(responseWriter, err)
 		return
 	}
 
@@ -23,30 +22,31 @@ func GetSubscriptions(responseWriter http.ResponseWriter, request *http.Request)
 
 	_, err = responseWriter.Write(binaryData)
 	if err != nil {
-		panic("Cannot write response")
+		ProcessError(responseWriter, err)
 	}
 }
 
 func AddSubscription(responseWriter http.ResponseWriter, request *http.Request) {
-	var subscriptionUrl domain.Url
+	var url interface{}
 
-	err := json.NewDecoder(request.Body).Decode(&subscriptionUrl)
+	err := json.NewDecoder(request.Body).Decode(&url)
 
 	if err != nil {
-		unsuccessfulResponseBody, _ := json.Marshal(domain.Error("Cannot parse data"))
-		responseWriter.WriteHeader(http.StatusUnsupportedMediaType)
-		responseWriter.Write(unsuccessfulResponseBody)
-		return
+		ProcessBadRequest(responseWriter, err)
 	}
 
-	log.Printf("%+v", subscriptionUrl)
+	log.Printf("%+v", url)
 	responseWriter.WriteHeader(http.StatusCreated)
+}
 
-	successResponseBody, _ := json.Marshal(domain.Success())
+func ProcessError(responseWriter http.ResponseWriter, err error) {
+	errorMessage := fmt.Sprintf("An error occurred on server: %v", err)
+	http.Error(responseWriter, errorMessage, http.StatusInternalServerError)
+	log.Print(errorMessage)
+}
 
-	_, err = responseWriter.Write(successResponseBody)
-
-	if err != nil {
-		panic("Cannot write response")
-	}
+func ProcessBadRequest(responseWriter http.ResponseWriter, err error) {
+	errorMessage := fmt.Sprintf("Bad request: %v", err)
+	http.Error(responseWriter, errorMessage, http.StatusBadRequest)
+	log.Print(errorMessage)
 }
