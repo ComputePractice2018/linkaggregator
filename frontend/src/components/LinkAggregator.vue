@@ -38,7 +38,11 @@
 
     <div id="news" class="flex-container">
       <div v-for="post in news_theme_list" v-bind:key="post.url">
-        <p>{{ post.title }}</p>
+        <h5>{{ post.title }}</h5>
+        <p>{{ post.date }}</p>
+        <p style="color:#3f3f3f">{{ post.url }}</p>
+        <p>{{ post.content }}</p>
+        <input type="button" value="Читать" v-on:click="show_content(post.id)"/>
       </div>
     </div>
   </div>
@@ -157,6 +161,15 @@ export default {
         if (exist == 0) {
           this.index_sub = -1
         }
+      }).catch(response => {
+        this.error = response.response.data
+      })
+    },
+    show_content: function (id) {
+      this.error = ''
+      const url = '/api/linkaggregator/news/content/1'
+      axios.get(url).then(response => {
+        this.news_theme_list[id].content = response.data
       }).catch(response => {
         this.error = response.response.data
       })
