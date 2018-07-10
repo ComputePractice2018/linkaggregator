@@ -7,4 +7,4 @@ RUN npm run build
 
 FROM nginx:alpine 
 
-COPY --from=builder /opt/frontend/dist /usr/share/nginx/html
+COPY --from:=builder /opt/frontend/dist /usr/share/nginx/html
