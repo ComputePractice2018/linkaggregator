@@ -12,5 +12,5 @@
 Backend:
 
 cd backend
-docker build -f Dockerfile -t linkaggrergator:<имя ветки> .
-docker run --rm --name inkaggrergator -e NAME=<параметр приложения> inkaggrergator:<имя ветки>
+docker build -f Dockerfile -t linkaggrergatorbackend:<имя ветки> .
+docker run --rm --name inkaggrergator -e NAME=<параметр приложения> inkaggrergatorbackend:<имя ветки>
