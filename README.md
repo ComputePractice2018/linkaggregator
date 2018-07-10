@@ -24,18 +24,21 @@
 ### GET /api/linkaggregator/subscriptions
 
 **Ответ**: 200 OK
+
 После запроса принимается массив, в котором перечислены темы из подписок, вида: ['Тема1', 'Тема2', ...]
 
 
 ### GET /api/linkaggregator/news/content/1
 
 **Ответ**: 200 OK
+
 После запроса принимается строка с содержанием новости вида: "Контент"
 
 
 ### PUT /api/linkaggregator/subscriptions/1
 
 **Тело запроса**: передается строка с темой вида: 'Тема'
+
 **Ответ**: 202 Accepted Location /api/linkaggregator/subscriptions/1
 
 
