@@ -7,3 +7,10 @@
 1. Как пользователь, я хочу иметь возможность редактировать подписки, чтобы не просматривать неактуальную информацию.
 
 ## API
+
+##запуск и сборка
+Backend:
+
+cd backend
+docker build -f Dockerfile -t linkaggrergator:<имя ветки> .
+docker run --rm --name inkaggrergator -e NAME=<параметр приложения> inkaggrergator:<имя ветки>
