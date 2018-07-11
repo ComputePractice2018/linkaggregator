@@ -35,7 +35,7 @@
         </div>
         <br>
 
-        <b-button variant="primary" v-b-toggle="'collapse2'" class="m-1" >Редактировать подписки</b-button>
+        <b-button variant="primary" v-b-toggle="'collapse2'" class="m-1">Редактировать подписки</b-button>
 
         <b-collapse id="collapse2">
           <table class="table" style="width: 25%">
@@ -56,8 +56,8 @@
     <div v-if="index_sub_show > -1"></div>
     <br><br>
 
-    <b-card style="width: 100%" v-for="post in news_theme_list" v-bind:key="post.id" 
-      :title="post.title" 
+    <b-card style="width: 100%" v-for="post in news_theme_list" v-bind:key="post.id"
+      :title="post.title"
       :sub-title="post.date"
       bg-variant="light"
       border-variant="info">
@@ -80,68 +80,10 @@ export default {
     return {
       index_sub_show: -1, // индекс для блока подписок: -1 - подписки не показываются
       index_sub: 0, // индекс, который показывает, есть ли подписки: -1 - подписок нет
-      index_edit_sub: -1, // индекс, который отвечает за блок редактирования подписок: -1 - блок не отображается
       index_sub_unsub: [], // массив, в котором хранится информация он наличии темы в подписках по порядку тем: -1 - темы нет
-      news_list: [
-        {
-          'id': 1,
-          'title': 'Заголовок1',
-          'date': 'Дата1',
-          'url': 'Ссылка1',
-          'themes': [ 'Политика' ],
-          'content': ''
-        },
-        {
-          'id': 2,
-          'title': 'Заголовок2',
-          'date': 'Дата2',
-          'url': 'Ссылка2',
-          'themes': [ 'Спорт' ],
-          'content': ''
-        },
-        {
-          'id': 3,
-          'title': 'Заголовок3',
-          'date': 'Дата3',
-          'url': 'Ссылка3',
-          'themes': [ 'Политика', 'Спорт' ],
-          'content': ''
-        },
-        {
-          'id': 4,
-          'title': 'Заголовок4',
-          'date': 'Дата4',
-          'url': 'Ссылка4',
-          'themes': [ 'Культура' ],
-          'content': ''
-        },
-        {
-          'id': 5,
-          'title': 'Заголовок5',
-          'date': 'Дата5',
-          'url': 'Ссылка5',
-          'themes': [ 'Наука', 'Технологии' ],
-          'content': ''
-        },
-        {
-          'id': 6,
-          'title': 'Заголовок6',
-          'date': 'Дата6',
-          'url': 'Ссылка6',
-          'themes': [ 'Технологии' ],
-          'content': ''
-        },
-        {
-          'id': 7,
-          'title': 'Заголовок7',
-          'date': 'Дата7',
-          'url': 'Ссылка7',
-          'themes': [ 'Общество' ],
-          'content': ''
-        }
-      ],
+      news_list: [],
       news_theme_list: [],
-      subscriptions: ['Культура', 'Технологии', 'Наука'],
+      subscriptions: [],
       themes: ['Спорт', 'Политика', 'Общество', 'Экономика', 'Культура', 'Технологии', 'Наука']
     }
   },
@@ -198,38 +140,32 @@ export default {
     show_subscriptions: function () {
       this.error = ''
       const url = '/api/linkaggregator/subscriptions'
-      if (this.subscriptions.length == 0) {
-        this.index_sub = -1
-      }
-      var length = this.themes.length
-      for (var i = 0; i < length; i++) {
-        if (this.subscriptions.indexOf(this.themes[i]) == -1) {
-          this.index_sub_unsub[i] = -1 // -1 означает, что темы нет в подписках
-        } else {
-          this.index_sub_unsub[i] = 0 // 0 означает, что тема в подписках
-        }
-      }
-      this.index_sub_show++
       axios.get(url).then(response => {
         this.subscriptions = response.data
-        
+        if (this.subscriptions.length == 0) {
+          this.index_sub = -1
+        }
+        var length = this.themes.length
+        for (var i = 0; i < length; i++) {
+          if (this.subscriptions.indexOf(this.themes[i]) == -1) {
+            this.index_sub_unsub[i] = -1 // -1 означает, что темы нет в подписках
+          } else {
+            this.index_sub_unsub[i] = 0 // 0 означает, что тема в подписках
+          }
+        }
+        this.index_sub_show++
       }).catch(response => {
         this.error = response.response.data
       })
     },
-    edit_subscriptions: function () {
-      this.index_edit_sub++
-      
-    },
     add_subscription: function (theme, i) {
       this.error = ''
       var number = this.subscriptions.length + 1
-      this.index_sub_unsub[i] = 0 // 0 означает, что тема в подписках
-        this.subscriptions.push(theme)
-        this.index_sub++
       const url = '/api/linkaggregator/subscriptions/' + number
       axios.put(url, theme).then(response => {
-        
+        this.index_sub_unsub[i] = 0 // 0 означает, что тема в подписках
+        this.subscriptions.push(theme)
+        this.index_sub++
       }).catch(response => {
         this.error = response.response.data
       })
@@ -237,7 +173,9 @@ export default {
     delete_subscription: function (theme, i) {
       this.error = ''
       var number = this.subscriptions.indexOf(theme)
-      this.index_sub_unsub[i] = -1 // -1 означает, что темы нет в подписках
+      const url = '/api/linkaggregator/subscriptions/' + number
+      axios.delete(url).then(response => {
+        this.index_sub_unsub[i] = -1 // -1 означает, что темы нет в подписках
         this.subscriptions.splice(this.subscriptions.indexOf(theme), 1)
         var exist = 0
         if (this.subscriptions.length > 0) {
@@ -246,9 +184,6 @@ export default {
         if (exist == 0) {
           this.index_sub = -1
         }
-      const url = '/api/linkaggregator/subscriptions/' + number
-      axios.delete(url).then(response => {
-        
       }).catch(response => {
         this.error = response.response.data
       })
