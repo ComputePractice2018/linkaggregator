@@ -20,19 +20,19 @@ type FeedPost struct {
 
 var feedPosts map[int][]FeedPost
 
-func GetFeed() []Feed {
+func GetFeed(subList Editable) []Feed {
 	var result []Feed
 	for k, v := range feedPosts {
-		result = append(result, Feed{Subscription: GetSubscriptionById(k), FeedPosts: v})
+		result = append(result, Feed{Subscription: subList.GetSubscriptionById(k), FeedPosts: v})
 	}
 	return result
 }
 
-func GetFeedPostsById(id int) (Feed, error) {
+func GetFeedPostsById(id int, subList Editable) (Feed, error) {
 	if id < 0 || id >= len(feedPosts) {
 		return Feed{}, fmt.Errorf("incorrect subscription id")
 	}
-	return Feed{Subscription: GetSubscriptionById(id), FeedPosts: feedPosts[id]}, nil
+	return Feed{Subscription: subList.GetSubscriptionById(id), FeedPosts: feedPosts[id]}, nil
 }
 
 func AddPostsToFeedById(subscriptionId int, posts []FeedPost) {
