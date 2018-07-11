@@ -6,14 +6,16 @@ import (
 	"github.com/ComputePractice2018/linkaggregator/backend/domain"
 	"log"
 	"fmt"
+	"strconv"
+	"github.com/gorilla/mux"
 )
 
 func GetSubscriptions(responseWriter http.ResponseWriter, request *http.Request) {
 
-	binaryData, err := json.Marshal(domain.Subscriptions)
+	binaryData, err := json.Marshal(domain.GetSubscriptions())
 
 	if err != nil {
-		ProcessBadRequest(responseWriter, err)
+		ProcessError(responseWriter, fmt.Sprintf("Unable to encode data: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -22,31 +24,71 @@ func GetSubscriptions(responseWriter http.ResponseWriter, request *http.Request)
 
 	_, err = responseWriter.Write(binaryData)
 	if err != nil {
-		ProcessError(responseWriter, err)
+		ProcessError(responseWriter, fmt.Sprintf("An error occurred on server: %v", err), http.StatusInternalServerError)
 	}
 }
 
 func AddSubscription(responseWriter http.ResponseWriter, request *http.Request) {
-	var url interface{}
+	var subscription domain.Subscription
 
-	err := json.NewDecoder(request.Body).Decode(&url)
+	err := json.NewDecoder(request.Body).Decode(&subscription)
 
 	if err != nil {
-		ProcessBadRequest(responseWriter, err)
+		ProcessError(responseWriter, "Bad request", http.StatusBadRequest)
 	}
 
-	log.Printf("%+v", url)
+	responseWriter.Header().Add("Location", request.URL.String()+"/"+strconv.Itoa(domain.AddSubscription(subscription.Url)))
 	responseWriter.WriteHeader(http.StatusCreated)
 }
 
-func ProcessError(responseWriter http.ResponseWriter, err error) {
-	errorMessage := fmt.Sprintf("An error occurred on server: %v", err)
-	http.Error(responseWriter, errorMessage, http.StatusInternalServerError)
-	log.Print(errorMessage)
+func EditSubscription(responseWriter http.ResponseWriter, request *http.Request) {
+	var subscription domain.Subscription
+	err := json.NewDecoder(request.Body).Decode(&subscription)
+	if err != nil {
+		ProcessError(responseWriter, fmt.Sprintf("Unable to decode PUT data: %v", err), http.StatusUnsupportedMediaType)
+		return
+	}
+
+	vars := mux.Vars(request)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		ProcessError(responseWriter, fmt.Sprintf("Incorrect subscribtion id: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	err = domain.EditSubscription(subscription, id)
+	if err != nil {
+		ProcessError(responseWriter, fmt.Sprintf("Incorrect subscribtion id: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	responseWriter.Header().Add("Location", request.URL.String())
+	responseWriter.WriteHeader(http.StatusAccepted)
 }
 
-func ProcessBadRequest(responseWriter http.ResponseWriter, err error) {
-	errorMessage := fmt.Sprintf("Bad request: %v", err)
-	http.Error(responseWriter, errorMessage, http.StatusBadRequest)
+func DeleteSubscription(responseWriter http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		ProcessError(responseWriter, fmt.Sprintf("Incorrect subscribtion id: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	err = domain.RemoveSubscription(id)
+
+	if err != nil {
+		ProcessError(responseWriter, fmt.Sprintf("Incorrect subscribtion id: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	responseWriter.Header().Add("Location", request.URL.String())
+	responseWriter.WriteHeader(http.StatusNoContent)
+}
+
+func ProcessError(responseWriter http.ResponseWriter, error string, code int) {
+	errorMessage := fmt.Sprintf(error, code)
+	http.Error(responseWriter, errorMessage, code)
 	log.Print(errorMessage)
 }
