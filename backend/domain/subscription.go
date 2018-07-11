@@ -46,8 +46,8 @@ func (subList *SubscriptionList) AddSubscription(url string) int {
 	subscription, posts := getSubscriptionByUrl(url)
 	subscription.Id = id
 	subList.subscriptions = append(subList.subscriptions, subscription)
-	AddPostsToFeedById(id, posts)
-	return len(subList.subscriptions)
+	AddPostsToFeedById(posts)
+	return len(subList.subscriptions) - 1
 }
 
 func (subList *SubscriptionList) EditSubscription(subscription Subscription, id int) error {

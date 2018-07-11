@@ -18,7 +18,7 @@ type FeedPost struct {
 	PubDate     time.Time `json:"pubDate"`
 }
 
-var feedPosts map[int][]FeedPost
+var feedPosts [][]FeedPost
 
 func GetFeed(subList Editable) []Feed {
 	var result []Feed
@@ -35,9 +35,6 @@ func GetFeedPostsById(id int, subList Editable) (Feed, error) {
 	return Feed{Subscription: subList.GetSubscriptionById(id), FeedPosts: feedPosts[id]}, nil
 }
 
-func AddPostsToFeedById(subscriptionId int, posts []FeedPost) {
-	if len(feedPosts) == 0 {
-		feedPosts = make(map[int][]FeedPost)
-	}
-	feedPosts[subscriptionId] = posts
+func AddPostsToFeedById(posts []FeedPost) {
+	feedPosts = append(feedPosts, posts)
 }
