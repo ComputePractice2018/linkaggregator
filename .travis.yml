@@ -9,7 +9,7 @@ matrix:
       script:
         - cd data
         - go test -v 
-        - cd ../server
+        - cd ../web
         - go test -v
 
     - language: node_js
