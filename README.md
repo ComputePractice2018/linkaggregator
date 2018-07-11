@@ -6,6 +6,16 @@
 1. Как пользователь, я хочу иметь возможность добавлять подписки, чтобы просматривать интересные мне новости.
 1. Как пользователь, я хочу иметь возможность редактировать подписки, чтобы не просматривать неактуальную информацию.
 
+
+## API
+
+##запуск и сборка
+Backend:
+
+cd backend
+docker build -f Dockerfile -t linkaggrergatorbackend:<имя ветки> .
+docker run --rm --name inkaggrergator -e NAME=<параметр приложения> inkaggrergatorbackend:<имя ветки>
+
 ## REST API
 
 ### GET /api/linkaggregator/news
@@ -45,4 +55,5 @@
 ### DELETE /api/linkaggregator/subscriptions/1
 
 Ответ: 204 No Content
+
 

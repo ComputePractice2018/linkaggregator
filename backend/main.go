@@ -1,6 +1,18 @@
 package main
 
 import (
+
+	"fmt"
+	//"github.com/ComputePractice2018/linkaggregator/backend/utils"
+)
+
+//func main() {
+	//firstNumber := flag.Int("first", 2, "first multiply attribute")
+	//secondNumber := flag.Int("second", 2, "second multiply attribute")
+
+//	fmt.Print("Hello world \n")
+	//fmt.Printf("Sum of two int: %d\n", utils.MultiplyTwoInt(*firstNumber, *secondNumber))
+
 	"github.com/gorilla/mux"
 	"github.com/ComputePractice2018/linkaggregator/backend/web"
 	"net/http"
@@ -18,4 +30,5 @@ func main() {
 	router.HandleFunc("/api/feed/{id}", web.GetFeedById).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
+
 }
