@@ -27,6 +27,7 @@ docker run --rm --name inkaggrergator -e NAME=<параметр приложен
     "title": "Заголовок",
     "date": "Дата",
     "url": "Ссылка",
+    "themes": [ "Тема" ],
     "content": ""
 }]
 ```
