@@ -2,6 +2,7 @@ package domain
 
 import (
 	"time"
+	"fmt"
 )
 
 type EditableFeed interface {
@@ -19,4 +20,45 @@ type FeedPost struct {
 	Description    string    `json:"description" sql:"type:text;"`
 	Link           string    `json:"link" sql:"type:text;"`
 	PubDate        time.Time `json:"pubDate"`
+}
+
+type FeedList struct {
+	feedList [][]FeedPost
+}
+
+func NewFeedList() *FeedList {
+	return &FeedList{}
+}
+
+func (fl *FeedList) GetFeed() []FeedPost {
+	var result []FeedPost
+
+	for _, value := range fl.feedList {
+		for _, value := range value {
+			result = append(result, value)
+		}
+	}
+
+	return result
+}
+
+func (fl *FeedList) GetFeedBySubscriptionId(id int) []FeedPost {
+	if id < 0 || id >= len(fl.feedList) {
+		fmt.Errorf("incorrect subscription id")
+	}
+	return fl.feedList[id]
+}
+
+func (fl *FeedList) AddPostsToFeed(id int, posts []FeedPost) {
+	fl.feedList = append(fl.feedList, posts)
+}
+
+func (fl *FeedList) RemoveFeedPostsBySubscriptionId(id int) error {
+
+	if id < 0 || id >= len(fl.feedList) {
+		return fmt.Errorf("incorrect subscription id")
+	}
+
+	fl.feedList = append(fl.feedList[:id], fl.feedList[id+1:]...)
+	return nil
 }

@@ -14,7 +14,9 @@ var TestSubscription = "{\"url\": \"https: //habr.com/rss/interesting/\",\"title
 
 func TestCrudInSubscriptionController(t *testing.T) {
 	subList := domain.NewSubscriptionList()
-	router := NewRouter(subList)
+	feedList := domain.NewFeedList()
+
+	router := NewRouter(subList, feedList)
 
 	req, err := http.NewRequest("GET", "/api/linkaggregator/subscriptions", nil)
 	if err != nil {

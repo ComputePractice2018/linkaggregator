@@ -23,10 +23,7 @@ var testSubscriptions = []Subscription{
 func TestAddSubscription(t *testing.T) {
 	subList := NewSubscriptionList()
 
-	subList.AddSubscription("https://habr.com/rss/interesting")
-
-	subList.GetSubscriptions()[0].Updated = time.Time{}
-	testSubscriptions[0].Updated = time.Time{}
+	subList.AddSubscription(testSubscriptions[0])
 
 	if subList.GetSubscriptions()[0] != testSubscriptions[0] {
 		t.Errorf("AddSubscription is not working")
@@ -35,7 +32,13 @@ func TestAddSubscription(t *testing.T) {
 
 func TestEditSubscription(t *testing.T) {
 	subList := NewSubscriptionList()
-	subList.AddSubscription("https://habr.com/rss/interesting")
+
+	subList.AddSubscription(Subscription{
+		Id:      0,
+		Url:     "https://habr.com/rss/interesting",
+		Title:   "Хабр / Интересные публикации",
+		Updated: time.Time{},
+	})
 
 	err := subList.EditSubscription(testSubscriptions[1], 0)
 
@@ -55,11 +58,20 @@ func TestEditSubscription(t *testing.T) {
 
 func TestRemoveSubscription(t *testing.T) {
 	subList := NewSubscriptionList()
-	subList.AddSubscription(testSubscriptions[0].Url)
-	subList.AddSubscription(testSubscriptions[1].Url)
+	subList.AddSubscription(Subscription{
+		Id:      0,
+		Url:     "https://habr.com/rss/interesting",
+		Title:   "Хабр / Интересные публикации",
+		Updated: time.Time{},
+	})
+	subList.AddSubscription(Subscription{
+		Id:      1,
+		Url:     "http://www.dailymail.co.uk/home/index.rss",
+		Title:   "Home | Mail Online",
+		Updated: time.Now(),
+	})
 
 	err := subList.RemoveSubscription(0)
-
 
 	subList.GetSubscriptions()[0].Updated = time.Time{}
 	testSubscriptions[1].Updated = time.Time{}
