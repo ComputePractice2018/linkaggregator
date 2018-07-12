@@ -14,41 +14,55 @@ type Subscription struct {
 	Updated time.Time `json:"updated"`
 }
 
-var subscriptions []Subscription
+type SubscriptionList struct {
+	subscriptions []Subscription
+}
 
-func GetSubscriptionById(id int) Subscription {
-	if id < 0 || id >= len(subscriptions) {
+type Editable interface {
+	GetSubscriptions() []Subscription
+	GetSubscriptionById(id int) Subscription
+	AddSubscription(url string) int
+	EditSubscription(subscription Subscription, id int) error
+	RemoveSubscription(id int) error
+}
+
+func NewSubscriptionList() *SubscriptionList {
+	return &SubscriptionList{}
+}
+
+func (subList *SubscriptionList) GetSubscriptionById(id int) Subscription {
+	if id < 0 || id >= len(subList.subscriptions) {
 		fmt.Errorf("incorrect subscription id")
 	}
-	return subscriptions[id]
+	return subList.subscriptions[id]
 }
 
-func GetSubscriptions() []Subscription {
-	return subscriptions
+func (subList *SubscriptionList) GetSubscriptions() []Subscription {
+	return subList.subscriptions
 }
 
-func AddSubscription(url string) int {
-	id := len(subscriptions)
+func (subList *SubscriptionList) AddSubscription(url string) int {
+	id := len(subList.subscriptions)
 	subscription, posts := getSubscriptionByUrl(url)
 	subscription.Id = id
-	subscriptions = append(subscriptions, subscription)
-	AddPostsToFeedById(id, posts)
-	return len(subscriptions)
+	subList.subscriptions = append(subList.subscriptions, subscription)
+	AddPostsToFeedById(posts)
+	return len(subList.subscriptions) - 1
 }
 
-func EditSubscription(subscription Subscription, id int) error {
-	if id < 0 || id >= len(subscriptions) {
+func (subList *SubscriptionList) EditSubscription(subscription Subscription, id int) error {
+	if id < 0 || id >= len(subList.subscriptions) {
 		return fmt.Errorf("incorrect subscription id")
 	}
-	subscriptions[id] = subscription
+	subList.subscriptions[id] = subscription
 	return nil
 }
 
-func RemoveSubscription(id int) error {
-	if id < 0 || id >= len(subscriptions) {
+func (subList *SubscriptionList) RemoveSubscription(id int) error {
+	if id < 0 || id >= len(subList.subscriptions) {
 		return fmt.Errorf("incorrect subscription id")
 	}
-	subscriptions = append(subscriptions[:id], subscriptions[id+1:]...)
+	subList.subscriptions = append(subList.subscriptions[:id], subList.subscriptions[id+1:]...)
 	return nil
 }
 
