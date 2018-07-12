@@ -4,10 +4,11 @@ import (
 	"time"
 )
 
-type Readable interface {
+type EditableFeed interface {
 	GetFeed() []FeedPost
 	GetFeedBySubscriptionId(id int) []FeedPost
 	AddPostsToFeed(id int, posts []FeedPost)
+	RemoveFeedPostsBySubscriptionId(id int) error
 }
 
 type FeedPost struct {

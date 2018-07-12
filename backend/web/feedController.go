@@ -18,7 +18,7 @@ type AssembledFeed struct {
 	FeedPosts    []domain.FeedPost   `json:"posts"`
 }
 
-func GetFeed(subList domain.Editable, feedList domain.Readable) func(responseWriter http.ResponseWriter, request *http.Request) {
+func GetFeed(subList domain.Editable, feedList domain.EditableFeed) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 
 		var result FullFeed
@@ -49,7 +49,7 @@ func GetFeed(subList domain.Editable, feedList domain.Readable) func(responseWri
 	}
 }
 
-func GetFeedById(subList domain.Editable, feedList domain.Readable) func(responseWriter http.ResponseWriter, request *http.Request) {
+func GetFeedById(subList domain.Editable, feedList domain.EditableFeed) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 		vars := mux.Vars(request)
 		id, err := strconv.Atoi(vars["id"])

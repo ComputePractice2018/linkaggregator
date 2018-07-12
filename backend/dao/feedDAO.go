@@ -3,6 +3,7 @@ package dao
 import (
 	"github.com/ComputePractice2018/linkaggregator/backend/domain"
 	"github.com/jinzhu/gorm"
+	"fmt"
 )
 
 type FeedDAO struct {
@@ -30,4 +31,16 @@ func (feedDao *FeedDAO) AddPostsToFeed(id int, posts []domain.FeedPost) {
 		value.SubscriptionId = id
 		feedDao.connection.Save(&value)
 	}
+}
+
+func (feedDao *FeedDAO) RemoveFeedPostsBySubscriptionId(id int) error {
+	var feedPosts []domain.FeedPost
+	feedDao.connection.Where("subscription_id = ?", id).Find(&feedPosts)
+
+	if len(feedPosts) == 0 {
+		return fmt.Errorf("can't find record #%d", id)
+	}
+
+	feedDao.connection.Delete(&feedPosts)
+	return nil
 }

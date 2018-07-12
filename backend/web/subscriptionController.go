@@ -29,7 +29,7 @@ func GetSubscriptions(subList domain.Editable) func(responseWriter http.Response
 	}
 }
 
-func AddSubscription(subList domain.Editable, feedList domain.Readable) func(responseWriter http.ResponseWriter, request *http.Request) {
+func AddSubscription(subList domain.Editable, feedList domain.EditableFeed) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 		var subscription domain.Subscription
 
@@ -76,7 +76,7 @@ func EditSubscription(subList domain.Editable) func(responseWriter http.Response
 	}
 }
 
-func DeleteSubscription(subList domain.Editable) func(responseWriter http.ResponseWriter, request *http.Request) {
+func DeleteSubscription(subList domain.Editable, feedList domain.EditableFeed) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 		vars := mux.Vars(request)
 		id, err := strconv.Atoi(vars["id"])
@@ -89,7 +89,14 @@ func DeleteSubscription(subList domain.Editable) func(responseWriter http.Respon
 		err = subList.RemoveSubscription(id)
 
 		if err != nil {
-			ProcessError(responseWriter, fmt.Sprintf("Incorrect subscribtion id: %v", err), http.StatusBadRequest)
+			ProcessError(responseWriter, fmt.Sprintf("Cannot remove subscription: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		err = feedList.RemoveFeedPostsBySubscriptionId(id)
+
+		if err != nil {
+			ProcessError(responseWriter, fmt.Sprintf("Cannot remove subscription: %v", err), http.StatusBadRequest)
 			return
 		}
 
