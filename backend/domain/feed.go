@@ -2,39 +2,20 @@ package domain
 
 import (
 	"time"
-	"fmt"
 )
 
-type Feed struct {
-	Subscription Subscription `json:"subscription"`
-	FeedPosts    []FeedPost   `json:"posts"`
+type Readable interface {
+	GetFeed() []FeedPost
+	GetFeedBySubscriptionId(id int) []FeedPost
+	AddPostsToFeed(id int, posts []FeedPost)
 }
 
 type FeedPost struct {
-	Title       string    `json:"title"`
-	Thumbnail   string    `json:"thumbnail"`
-	Description string    `json:"description"`
-	Link        string    `json:"link"`
-	PubDate     time.Time `json:"pubDate"`
-}
-
-var feedPosts [][]FeedPost
-
-func GetFeed(subList Editable) []Feed {
-	var result []Feed
-	for k, v := range feedPosts {
-		result = append(result, Feed{Subscription: subList.GetSubscriptionById(k), FeedPosts: v})
-	}
-	return result
-}
-
-func GetFeedPostsById(id int, subList Editable) (Feed, error) {
-	if id < 0 || id >= len(feedPosts) {
-		return Feed{}, fmt.Errorf("incorrect subscription id")
-	}
-	return Feed{Subscription: subList.GetSubscriptionById(id), FeedPosts: feedPosts[id]}, nil
-}
-
-func AddPostsToFeedById(posts []FeedPost) {
-	feedPosts = append(feedPosts, posts)
+	Id             int       `json:"id"`
+	SubscriptionId int       `json:"subscription_id"`
+	Title          string    `json:"title" sql:"type:text;"`
+	Thumbnail      string    `json:"thumbnail"`
+	Description    string    `json:"description" sql:"type:text;"`
+	Link           string    `json:"link" sql:"type:text;"`
+	PubDate        time.Time `json:"pubDate"`
 }

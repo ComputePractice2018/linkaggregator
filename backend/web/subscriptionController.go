@@ -29,7 +29,7 @@ func GetSubscriptions(subList domain.Editable) func(responseWriter http.Response
 	}
 }
 
-func AddSubscription(subList domain.Editable) func(responseWriter http.ResponseWriter, request *http.Request) {
+func AddSubscription(subList domain.Editable, feedList domain.Readable) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 		var subscription domain.Subscription
 
@@ -39,7 +39,11 @@ func AddSubscription(subList domain.Editable) func(responseWriter http.ResponseW
 			ProcessError(responseWriter, "Bad request", http.StatusBadRequest)
 		}
 
-		responseWriter.Header().Add("Location", request.URL.String()+"/"+strconv.Itoa(subList.AddSubscription(subscription.Url)))
+		filledSubscription, posts := GetSubscriptionByUrl(subscription.Url)
+		subscriptionId := subList.AddSubscription(filledSubscription)
+		feedList.AddPostsToFeed(subscriptionId, posts)
+
+		responseWriter.Header().Add("Location", request.URL.String()+"/"+strconv.Itoa(subscriptionId))
 		responseWriter.WriteHeader(http.StatusCreated)
 	}
 }

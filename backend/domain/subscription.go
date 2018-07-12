@@ -3,8 +3,6 @@ package domain
 import (
 	"time"
 	"fmt"
-	"net/http"
-	"encoding/xml"
 )
 
 type Subscription struct {
@@ -21,7 +19,7 @@ type SubscriptionList struct {
 type Editable interface {
 	GetSubscriptions() []Subscription
 	GetSubscriptionById(id int) Subscription
-	AddSubscription(url string) int
+	AddSubscription(subscription Subscription) int
 	EditSubscription(subscription Subscription, id int) error
 	RemoveSubscription(id int) error
 }
@@ -41,12 +39,10 @@ func (subList *SubscriptionList) GetSubscriptions() []Subscription {
 	return subList.subscriptions
 }
 
-func (subList *SubscriptionList) AddSubscription(url string) int {
+func (subList *SubscriptionList) AddSubscription(subscription Subscription) int {
 	id := len(subList.subscriptions)
-	subscription, posts := getSubscriptionByUrl(url)
 	subscription.Id = id
 	subList.subscriptions = append(subList.subscriptions, subscription)
-	AddPostsToFeedById(posts)
 	return len(subList.subscriptions) - 1
 }
 
@@ -64,32 +60,4 @@ func (subList *SubscriptionList) RemoveSubscription(id int) error {
 	}
 	subList.subscriptions = append(subList.subscriptions[:id], subList.subscriptions[id+1:]...)
 	return nil
-}
-
-func getSubscriptionByUrl(url string) (Subscription, []FeedPost) {
-	resp, err := http.Get(url)
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer resp.Body.Close()
-
-	rss := Rss{}
-
-	decoder := xml.NewDecoder(resp.Body)
-	err = decoder.Decode(&rss)
-
-	if err != nil {
-		panic("Cannot decode rss response")
-	}
-
-	var posts []FeedPost
-
-	for _, post := range rss.Channel.Items {
-		timeObject, _ := time.Parse(time.RFC1123, post.PubDate)
-		posts = append(posts, FeedPost{Title: post.Title, Thumbnail: post.Thumbnail, Description: post.Desc, Link: post.Link, PubDate: timeObject})
-	}
-
-	return Subscription{Url: url, Title: rss.Channel.Title, Updated: time.Now()}, posts
 }
