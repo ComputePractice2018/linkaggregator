@@ -5,36 +5,60 @@ import (
 	"fmt"
 )
 
-type Feed struct {
-	Subscription Subscription `json:"subscription"`
-	FeedPosts    []FeedPost   `json:"posts"`
+type EditableFeed interface {
+	GetFeed() []FeedPost
+	GetFeedBySubscriptionId(id int) []FeedPost
+	AddPostsToFeed(id int, posts []FeedPost)
+	RemoveFeedPostsBySubscriptionId(id int) error
 }
 
 type FeedPost struct {
-	Title       string    `json:"title"`
-	Thumbnail   string    `json:"thumbnail"`
-	Description string    `json:"description"`
-	Link        string    `json:"link"`
-	PubDate     time.Time `json:"pubDate"`
+	Id             int       `json:"id"`
+	SubscriptionId int       `json:"subscription_id"`
+	Title          string    `json:"title" sql:"type:text;"`
+	Thumbnail      string    `json:"thumbnail"`
+	Description    string    `json:"description" sql:"type:text;"`
+	Link           string    `json:"link" sql:"type:text;"`
+	PubDate        time.Time `json:"pubDate"`
 }
 
-var feedPosts [][]FeedPost
+type FeedList struct {
+	feedList [][]FeedPost
+}
 
-func GetFeed(subList Editable) []Feed {
-	var result []Feed
-	for k, v := range feedPosts {
-		result = append(result, Feed{Subscription: subList.GetSubscriptionById(k), FeedPosts: v})
+func NewFeedList() *FeedList {
+	return &FeedList{}
+}
+
+func (fl *FeedList) GetFeed() []FeedPost {
+	var result []FeedPost
+
+	for _, value := range fl.feedList {
+		for _, value := range value {
+			result = append(result, value)
+		}
 	}
+
 	return result
 }
 
-func GetFeedPostsById(id int, subList Editable) (Feed, error) {
-	if id < 0 || id >= len(feedPosts) {
-		return Feed{}, fmt.Errorf("incorrect subscription id")
+func (fl *FeedList) GetFeedBySubscriptionId(id int) []FeedPost {
+	if id < 0 || id >= len(fl.feedList) {
+		fmt.Errorf("incorrect subscription id")
 	}
-	return Feed{Subscription: subList.GetSubscriptionById(id), FeedPosts: feedPosts[id]}, nil
+	return fl.feedList[id]
 }
 
-func AddPostsToFeedById(posts []FeedPost) {
-	feedPosts = append(feedPosts, posts)
+func (fl *FeedList) AddPostsToFeed(id int, posts []FeedPost) {
+	fl.feedList = append(fl.feedList, posts)
+}
+
+func (fl *FeedList) RemoveFeedPostsBySubscriptionId(id int) error {
+
+	if id < 0 || id >= len(fl.feedList) {
+		return fmt.Errorf("incorrect subscription id")
+	}
+
+	fl.feedList = append(fl.feedList[:id], fl.feedList[id+1:]...)
+	return nil
 }

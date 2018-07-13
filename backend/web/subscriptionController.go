@@ -29,7 +29,7 @@ func GetSubscriptions(subList domain.Editable) func(responseWriter http.Response
 	}
 }
 
-func AddSubscription(subList domain.Editable) func(responseWriter http.ResponseWriter, request *http.Request) {
+func AddSubscription(subList domain.Editable, feedList domain.EditableFeed) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 		var subscription domain.Subscription
 
@@ -39,7 +39,11 @@ func AddSubscription(subList domain.Editable) func(responseWriter http.ResponseW
 			ProcessError(responseWriter, "Bad request", http.StatusBadRequest)
 		}
 
-		responseWriter.Header().Add("Location", request.URL.String()+"/"+strconv.Itoa(subList.AddSubscription(subscription.Url)))
+		filledSubscription, posts := GetSubscriptionByUrl(subscription.Url)
+		subscriptionId := subList.AddSubscription(filledSubscription)
+		feedList.AddPostsToFeed(subscriptionId, posts)
+
+		responseWriter.Header().Add("Location", request.URL.String()+"/"+strconv.Itoa(subscriptionId))
 		responseWriter.WriteHeader(http.StatusCreated)
 	}
 }
@@ -72,7 +76,7 @@ func EditSubscription(subList domain.Editable) func(responseWriter http.Response
 	}
 }
 
-func DeleteSubscription(subList domain.Editable) func(responseWriter http.ResponseWriter, request *http.Request) {
+func DeleteSubscription(subList domain.Editable, feedList domain.EditableFeed) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 		vars := mux.Vars(request)
 		id, err := strconv.Atoi(vars["id"])
@@ -85,7 +89,14 @@ func DeleteSubscription(subList domain.Editable) func(responseWriter http.Respon
 		err = subList.RemoveSubscription(id)
 
 		if err != nil {
-			ProcessError(responseWriter, fmt.Sprintf("Incorrect subscribtion id: %v", err), http.StatusBadRequest)
+			ProcessError(responseWriter, fmt.Sprintf("Cannot remove subscription: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		err = feedList.RemoveFeedPostsBySubscriptionId(id)
+
+		if err != nil {
+			ProcessError(responseWriter, fmt.Sprintf("Cannot remove subscription: %v", err), http.StatusBadRequest)
 			return
 		}
 

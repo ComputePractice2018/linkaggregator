@@ -2,17 +2,37 @@ package web
 
 import (
 	"net/http"
-	"encoding/json"
 	"github.com/ComputePractice2018/linkaggregator/backend/domain"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"strconv"
 )
 
-func GetFeed(subList domain.Editable) func(responseWriter http.ResponseWriter, request *http.Request) {
+type FullFeed struct {
+	Feeds []AssembledFeed `json:"feed"`
+}
+
+type AssembledFeed struct {
+	Subscription domain.Subscription `json:"subscription"`
+	FeedPosts    []domain.FeedPost   `json:"posts"`
+}
+
+func GetFeed(subList domain.Editable, feedList domain.EditableFeed) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
 
-		binaryData, err := json.Marshal(domain.GetFeed(subList))
+		var result FullFeed
+
+		subs := subList.GetSubscriptions()
+
+		for _, value := range subs {
+			result.Feeds = append(result.Feeds, AssembledFeed{
+				Subscription: value,
+				FeedPosts:    feedList.GetFeedBySubscriptionId(value.Id),
+			})
+		}
+
+		binaryData, err := json.Marshal(result)
 
 		if err != nil {
 			ProcessError(responseWriter, fmt.Sprintf("Unable to encode data: %v", err), http.StatusInternalServerError)
@@ -29,9 +49,8 @@ func GetFeed(subList domain.Editable) func(responseWriter http.ResponseWriter, r
 	}
 }
 
-func GetFeedById(subList domain.Editable) func(responseWriter http.ResponseWriter, request *http.Request) {
+func GetFeedById(subList domain.Editable, feedList domain.EditableFeed) func(responseWriter http.ResponseWriter, request *http.Request) {
 	return func(responseWriter http.ResponseWriter, request *http.Request) {
-
 		vars := mux.Vars(request)
 		id, err := strconv.Atoi(vars["id"])
 
@@ -40,9 +59,10 @@ func GetFeedById(subList domain.Editable) func(responseWriter http.ResponseWrite
 			return
 		}
 
-		posts, err := domain.GetFeedPostsById(id, subList)
-
-		binaryData, err := json.Marshal(posts)
+		binaryData, err := json.Marshal(AssembledFeed{
+			Subscription: subList.GetSubscriptionById(id),
+			FeedPosts:    feedList.GetFeedBySubscriptionId(id),
+		})
 
 		if err != nil {
 			ProcessError(responseWriter, fmt.Sprintf("Unable to encode data: %v", err), http.StatusInternalServerError)
